@@ -20,6 +20,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^20.14.5",
+    "javascript-obfuscator": "^5.4.3",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
