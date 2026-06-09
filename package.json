@@ -9,8 +9,9 @@
     "type": "git",
     "url": "git+https://github.com"
   },
-  "scripts": {
-    "build": "tsup"
+"scripts": {
+  "build": "tsup",
+  "obfuscate": "javascript-obfuscator dist/index.js --output dist/index.js --compact true --string-array true --rotate-string-array true --self-defending true"
   },
   "keywords": [
     "nxgate",
