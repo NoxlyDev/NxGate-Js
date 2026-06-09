@@ -9,6 +9,7 @@ export enum ValidationType {
   LICENSE_SCOPE_FAILED = 'LICENSE_SCOPE_FAILED',
   IP_LIMIT_EXCEEDED = 'IP_LIMIT_EXCEEDED',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  PRODUCT_MISMATCH = 'PRODUCT_MISMATCH',
   FAILED_CHALLENGE = 'FAILED_CHALLENGE',
   SERVER_ERROR = 'SERVER_ERROR',
   CONNECTION_ERROR = 'CONNECTION_ERROR'
@@ -51,10 +52,10 @@ export default class NxGate {
     return this;
   }
 
-  async verify(licenseKey: string, scope?: string, metadata?: string): Promise<ValidationType> {
+  async verify(licenseKey: string, scope?: string, metadata?: string, productSlug?: string): Promise<ValidationType> {
     try {
       const challenge = this.useChallenge ? String(Date.now()) : undefined;
-      const response = await this.requestServer(this.buildUrl(licenseKey, scope, metadata, challenge));
+      const response = await this.requestServer(this.buildUrl(licenseKey, scope, metadata, challenge, productSlug));
 
       if (response.error || !response.result) {
         if (this.debugMode) console.log(`Error: ${response.error}`);
@@ -89,11 +90,11 @@ export default class NxGate {
     }
   }
 
-  async verifySimple(licenseKey: string, scope?: string, metadata?: string): Promise<boolean> {
-    return (await this.verify(licenseKey, scope, metadata)) === ValidationType.VALID;
+  async verifySimple(licenseKey: string, scope?: string, metadata?: string, productSlug?: string): Promise<boolean> {
+    return (await this.verify(licenseKey, scope, metadata, productSlug)) === ValidationType.VALID;
   }
 
-  private buildUrl(licenseKey: string, scope?: string, metadata?: string, challenge?: string): string {
+  private buildUrl(licenseKey: string, scope?: string, metadata?: string, challenge?: string, productSlug?: string): string {
     let queryString = '';
 
     if (metadata) {
@@ -102,6 +103,10 @@ export default class NxGate {
 
     if (scope) {
       queryString += `${queryString ? '&' : '?'}scope=${encodeURIComponent(scope)}`;
+    }
+
+    if (productSlug) {
+      queryString += `${queryString ? '&' : '?'}productSlug=${encodeURIComponent(productSlug)}`;
     }
 
     if (this.useChallenge && challenge) {
@@ -121,7 +126,6 @@ export default class NxGate {
     return response.data;
   }
 
-  
   private verifyChallenge(challenge: string, signedChallengeBase64: string): boolean {
     try {
       const pemHeader = "-----BEGIN PUBLIC KEY-----";
